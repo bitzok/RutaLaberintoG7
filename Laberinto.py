@@ -22,7 +22,6 @@ pygame.display.set_caption("G7-PROBLEMA LABERINTO")
 
 # Camino libre = 0
 # Camino ocupado = 1
-# Laberinto.py
 
 def generate_maze(maze, progress_callback=None):
     start_x, start_y = random.randint(0, GRID_WIDTH - 1), random.randint(0, GRID_HEIGHT - 1)
