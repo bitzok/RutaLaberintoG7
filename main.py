@@ -1,5 +1,5 @@
 import pygame
-from Laberinto import Laberinto
+from laberinto import Laberinto
 from juego_robot import JuegoRobot
 
 def main():
