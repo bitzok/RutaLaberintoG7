@@ -22,7 +22,7 @@ class GeneticAlgorithm:
         self.population_size = population_size
         self.mutation_rate = mutation_rate
         self.max_generations = max_generations
-        self.path_length = 1000  # Longitud máxima de cada ruta
+        self.path_length = 3000  # Longitud máxima de cada ruta
         self.population = self.initialize_population()
 
     def initialize_population(self):
