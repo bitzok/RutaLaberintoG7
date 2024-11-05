@@ -1,6 +1,6 @@
 import pygame
 import time
-from algoritmoGenetico import GeneticAlgorithm
+from algoritmo_genetico import GeneticAlgorithm
 
 class JuegoRobot:
     BLUE = (0, 0, 255)
