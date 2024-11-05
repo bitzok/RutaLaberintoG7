@@ -7,7 +7,7 @@ class Laberinto:
     BLACK = (0, 0, 0)
     GREEN = (0, 255, 0)
 
-    def __init__(self, ancho, alto, tamano_celda):
+    def _init_(self, ancho, alto, tamano_celda):
         self.ancho = ancho
         self.alto = alto
         self.tamano_celda = tamano_celda
@@ -66,4 +66,4 @@ class Laberinto:
                 pygame.draw.rect(self.screen, color, (x * self.tamano_celda, y * self.tamano_celda, self.tamano_celda, self.tamano_celda))
 
     def obtener_matriz(self):
-        return self.maze
+        return self.maze

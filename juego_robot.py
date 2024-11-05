@@ -7,7 +7,7 @@ class JuegoRobot:
     GREEN = (0, 255, 0)
     RED = (255, 0, 0)
 
-    def __init__(self, laberinto):
+    def _init_(self, laberinto):
         self.laberinto = laberinto
         self.start_pos = (0, 0)
         self.end_pos = (self.laberinto.grid_ancho - 2, self.laberinto.grid_alto - 2)
@@ -74,4 +74,4 @@ class JuegoRobot:
                 self.mostrar_pantalla_victoria(simulation_time, pasos_dados)
                 break
 
-        pygame.quit()
+        pygame.quit()

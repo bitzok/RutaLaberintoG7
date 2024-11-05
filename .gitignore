@@ -1,1 +1,5 @@
+# Ignorar archivos y carpetas generadas por Python
 __pycache__/
+*.py[cod]
+*.pyo
+*.pyd
