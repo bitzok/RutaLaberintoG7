@@ -1,69 +1,44 @@
-import pygame
 import random
+import pygame
 
 class Laberinto:
-    DIRECTIONS = [(0, -1), (0, 1), (-1, 0), (1, 0)]
-    WHITE = (255, 255, 255)
-    BLACK = (0, 0, 0)
-    GREEN = (0, 255, 0)
+    DIRECCIONES = [(0, -1), (0, 1), (-1, 0), (1, 0)]
 
-    def _init_(self, ancho, alto, tamano_celda):
+    def __init__(self, ancho, alto, tamano_celda):
         self.ancho = ancho
         self.alto = alto
         self.tamano_celda = tamano_celda
-        self.grid_ancho = ancho // tamano_celda
-        self.grid_alto = alto // tamano_celda
-        self.maze = [[1 for _ in range(self.grid_ancho)] for _ in range(self.grid_alto)]
-        self.screen = pygame.display.set_mode((ancho, alto))
-        pygame.display.set_caption("G7-PROBLEMA LABERINTO")
-    
-    def generar(self):
+        self.ancho_celdas = ancho // tamano_celda
+        self.alto_celdas = alto // tamano_celda
+        self.mapa = [[1 for _ in range(self.ancho_celdas)] for _ in range(self.alto_celdas)]
+        self.posicion_inicio = (0, 0)
+        self.posicion_fin = (self.ancho_celdas - 2, self.alto_celdas - 2)
+        self.generar_laberinto()
 
-        start_x, start_y = random.randint(0, self.grid_ancho - 1), random.randint(0, self.grid_alto - 1)
-        start_x = (start_x // 2) * 2
-        start_y = (start_y // 2) * 2
-        self.maze[start_y][start_x] = 0
-        walls = [(start_x, start_y, dx, dy) for dx, dy in self.DIRECTIONS if 0 <= start_x + dx * 2 < self.grid_ancho and 0 <= start_y + dy * 2 < self.grid_alto]
+    def generar_laberinto(self):
+        inicio_x, inicio_y = random.randint(0, self.ancho_celdas - 1), random.randint(0, self.alto_celdas - 1)
+        inicio_x = (inicio_x // 2) * 2
+        inicio_y = (inicio_y // 2) * 2
+        self.mapa[inicio_y][inicio_x] = 0
 
-        total_cells = self.grid_ancho * self.grid_alto // 2
-        cleared_cells = 0
+        muros = [(inicio_x, inicio_y, dx, dy) for dx, dy in self.DIRECCIONES if 0 <= inicio_x + dx * 2 < self.ancho_celdas and 0 <= inicio_y + dy * 2 < self.alto_celdas]
 
-        while walls:
-            x, y, dx, dy = random.choice(walls)
-            walls.remove((x, y, dx, dy))
+        while muros:
+            x, y, dx, dy = random.choice(muros)
+            muros.remove((x, y, dx, dy))
 
             nx, ny = x + dx * 2, y + dy * 2
-            if 0 <= nx < self.grid_ancho and 0 <= ny < self.grid_alto and self.maze[ny][nx] == 1:
-                self.maze[y + dy][x + dx] = 0
-                self.maze[ny][nx] = 0
-                cleared_cells += 1
+            if 0 <= nx < self.ancho_celdas and 0 <= ny < self.alto_celdas and self.mapa[ny][nx] == 1:
+                self.mapa[y + dy][x + dx] = 0
+                self.mapa[ny][nx] = 0
 
-                self.mostrar_pantalla_carga(cleared_cells / total_cells)
+                muros += [(nx, ny, dx, dy) for dx, dy in self.DIRECCIONES if 0 <= nx + dx * 2 < self.ancho_celdas and 0 <= ny + dy * 2 < self.alto_celdas]
 
-                walls += [(nx, ny, dx, dy) for dx, dy in self.DIRECTIONS if 0 <= nx + dx * 2 < self.grid_ancho and 0 <= ny + dy * 2 < self.grid_alto]
+    def dibujar_laberinto(self, pantalla, colores):
+        for y in range(self.alto_celdas):
+            for x in range(self.ancho_celdas):
+                color = colores['BLANCO'] if self.mapa[y][x] == 0 else colores['NEGRO']
+                pygame.draw.rect(pantalla, color, (x * self.tamano_celda, y * self.tamano_celda, self.tamano_celda, self.tamano_celda))
 
-    def mostrar_pantalla_carga(self, progreso):
-        self.screen.fill(self.WHITE)
-        font = pygame.font.Font(None, 36)
-        
-        loading_text = font.render("Generando laberinto...", True, self.BLACK)
-        loading_text_rect = loading_text.get_rect(center=(self.ancho // 2, self.alto // 2 - 50))
-        self.screen.blit(loading_text, loading_text_rect)
-        
-        bar_width = 400
-        bar_height = 30
-        progress_width = int(bar_width * progreso)
-        
-        pygame.draw.rect(self.screen, self.BLACK, [(self.ancho - bar_width) // 2, self.alto // 2, bar_width, bar_height], 2)
-        pygame.draw.rect(self.screen, self.GREEN, [(self.ancho - bar_width) // 2, self.alto // 2, progress_width, bar_height])
-
-        pygame.display.flip()
-
-    def dibujar(self):
-        for y in range(self.grid_alto):
-            for x in range(self.grid_ancho):
-                color = self.WHITE if self.maze[y][x] == 0 else self.BLACK
-                pygame.draw.rect(self.screen, color, (x * self.tamano_celda, y * self.tamano_celda, self.tamano_celda, self.tamano_celda))
-
-    def obtener_matriz(self):
-        return self.maze
+    def es_camino_libre(self, x, y):
+        return 0 <= x < self.alto_celdas and 0 <= y < self.ancho_celdas and self.mapa[x][y] == 0

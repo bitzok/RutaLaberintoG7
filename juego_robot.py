@@ -1,77 +1,94 @@
 import pygame
-import time
 from algoritmo_genetico import GeneticAlgorithm
 
 class JuegoRobot:
-    BLUE = (0, 0, 255)
-    GREEN = (0, 255, 0)
-    RED = (255, 0, 0)
-
-    def _init_(self, laberinto):
+    COLORES = {
+        "BLANCO": (255, 255, 255),
+        "NEGRO": (0, 0, 0),
+        "VERDE": (0, 255, 0),
+        "AZUL": (0, 0, 255),
+        "ROJO": (255, 0, 0),
+    }
+    def __init__(self, laberinto):
+        self.pantalla = pygame.display.set_mode((laberinto.ancho, laberinto.alto))
+        pygame.display.set_caption("G7-PROBLEMA LABERINTO")
         self.laberinto = laberinto
-        self.start_pos = (0, 0)
-        self.end_pos = (self.laberinto.grid_ancho - 2, self.laberinto.grid_alto - 2)
-        self.robot_pos = self.start_pos
-        self.genetic_algo = GeneticAlgorithm(self.laberinto.obtener_matriz(), self.start_pos, self.end_pos)
+        self.posicion_robot = laberinto.posicion_inicio
+        self.reloj = pygame.time.Clock()
+        self.jugando = True
+        self.mejor_ruta = []
+        self.indice_movimiento = 0
+        self.contador_pasos = 0
+        start_pos = self.laberinto.posicion_inicio
+        end_pos = self.laberinto.posicion_fin
+        algoritmo_genetico = GeneticAlgorithm(
+            maze=laberinto.mapa,
+            start_pos=start_pos,
+            end_pos=end_pos,
+            population_size=200,
+            mutation_rate=0.04,
+            max_generations=1000
+        )
+        self.mejor_ruta = algoritmo_genetico.evolve()
+        self.indice_movimiento = 0
 
-    def dibujar_robot(self, posicion):
-        pygame.draw.rect(self.laberinto.screen, self.BLUE, (posicion[1] * self.laberinto.tamano_celda, posicion[0] * self.laberinto.tamano_celda, self.laberinto.tamano_celda, self.laberinto.tamano_celda))
+    def dibujar_elementos(self):
+        self.pantalla.fill(self.COLORES["BLANCO"])
+        self.laberinto.dibujar_laberinto(self.pantalla, self.COLORES)
+        self.dibujar_robot()
+        pygame.draw.rect(self.pantalla, self.COLORES["VERDE"],
+                         (self.laberinto.posicion_inicio[1] * self.laberinto.tamano_celda, self.laberinto.posicion_inicio[0] * self.laberinto.tamano_celda, self.laberinto.tamano_celda, self.laberinto.tamano_celda))
+        pygame.draw.rect(self.pantalla, self.COLORES["ROJO"],
+                         (self.laberinto.posicion_fin[1] * self.laberinto.tamano_celda, self.laberinto.posicion_fin[0] * self.laberinto.tamano_celda, self.laberinto.tamano_celda, self.laberinto.tamano_celda))
+    def dibujar_robot(self):
+        pygame.draw.rect(self.pantalla, self.COLORES["AZUL"],
+                         (self.posicion_robot[1] * self.laberinto.tamano_celda, self.posicion_robot[0] * self.laberinto.tamano_celda, self.laberinto.tamano_celda, self.laberinto.tamano_celda))
 
-    def mover_robot(self, direccion):
-        x, y = self.robot_pos
-        maze = self.laberinto.obtener_matriz()
-        if direccion == "up" and x > 0 and maze[x - 1][y] == 0:
-            x -= 1
-        elif direccion == "down" and x < self.laberinto.grid_alto - 1 and maze[x + 1][y] == 0:
-            x += 1
-        elif direccion == "left" and y > 0 and maze[x][y - 1] == 0:
-            y -= 1
-        elif direccion == "right" and y < self.laberinto.grid_ancho - 1 and maze[x][y + 1] == 0:
-            y += 1
-        self.robot_pos = (x, y)
+    def mover_robot(self):
+        # Mover el robot siguiendo la mejor ruta encontrada por el algoritmo genético
+        if self.indice_movimiento < len(self.mejor_ruta):
+            direccion = self.mejor_ruta[self.indice_movimiento]
+            x, y = self.posicion_robot
 
-    def mostrar_pantalla_victoria(self, tiempo_simulacion, pasos_dados):
-        font = pygame.font.Font(None, 74)
-        small_font = pygame.font.Font(None, 36)
+            # Comprobar la dirección y si el movimiento es posible
+            if direccion == "up" and self.laberinto.es_camino_libre(x - 1, y):
+                x -= 1
+            elif direccion == "down" and self.laberinto.es_camino_libre(x + 1, y):
+                x += 1
+            elif direccion == "left" and self.laberinto.es_camino_libre(x, y - 1):
+                y -= 1
+            elif direccion == "right" and self.laberinto.es_camino_libre(x, y + 1):
+                y += 1
 
-        text = font.render("¡PRUEBA FINALIZADA!", True, (0, 0, 0))
-        time_text = small_font.render(f"Tiempo de Simulación: {tiempo_simulacion:.2f} segundos", True, (0, 0, 0))
-        steps_text = small_font.render(f"Pasos Dados: {pasos_dados}", True, (0, 0, 0))
-
-        self.laberinto.screen.fill((255, 255, 255))
-        self.laberinto.screen.blit(text, text.get_rect(center=(self.laberinto.ancho // 2, self.laberinto.alto // 2 - 50)))
-        self.laberinto.screen.blit(time_text, time_text.get_rect(center=(self.laberinto.ancho // 2, self.laberinto.alto // 2 + 20)))
-        self.laberinto.screen.blit(steps_text, steps_text.get_rect(center=(self.laberinto.ancho // 2, self.laberinto.alto // 2 + 60)))
-
+            # Actualizar la posición del robot
+            self.posicion_robot = (x, y)
+            self.indice_movimiento += 1
+            self.contador_pasos += 1
+    def mostrar_pantalla_victoria(self):
+        fuente = pygame.font.Font(None, 74)
+        texto = fuente.render(f"¡Ganaste! Pasos: {self.contador_pasos}", True, self.COLORES["NEGRO"])  # Mostrar pasos
+        rect_texto = texto.get_rect(center=(self.laberinto.ancho // 2, self.laberinto.alto // 2))
+        self.pantalla.fill(self.COLORES["BLANCO"])
+        self.pantalla.blit(texto, rect_texto)
         pygame.display.flip()
-        pygame.time.delay(3000)
+        pygame.time.delay(2000)
 
     def ejecutar(self):
-        self.laberinto.generar()
-        best_path = self.genetic_algo.evolve()
-        start_time = time.time()
-        pasos_dados = 0
+        while self.jugando:
+            self.dibujar_elementos()
 
-        for move in best_path:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    return
+            # Mover el robot automáticamente
+            if self.posicion_robot != self.laberinto.posicion_fin:
+                self.mover_robot()
+            else:
+                self.mostrar_pantalla_victoria()
+                self.jugando = False
 
-            self.mover_robot(move)
-            pasos_dados += 1
-
-            self.laberinto.dibujar()
-            self.dibujar_robot(self.robot_pos)
-            pygame.draw.rect(self.laberinto.screen, self.GREEN, (self.start_pos[1] * self.laberinto.tamano_celda, self.start_pos[0] * self.laberinto.tamano_celda, self.laberinto.tamano_celda, self.laberinto.tamano_celda))
-            pygame.draw.rect(self.laberinto.screen, self.RED, (self.end_pos[1] * self.laberinto.tamano_celda, self.end_pos[0] * self.laberinto.tamano_celda, self.laberinto.tamano_celda, self.laberinto.tamano_celda))
+            for evento in pygame.event.get():
+                if evento.type == pygame.QUIT:
+                    self.jugando = False
 
             pygame.display.flip()
-            pygame.time.delay(100)
+            self.reloj.tick(10)
 
-            if self.robot_pos == self.end_pos:
-                simulation_time = time.time() - start_time
-                self.mostrar_pantalla_victoria(simulation_time, pasos_dados)
-                break
-
-        pygame.quit()
+        pygame.quit()

@@ -1,10 +1,11 @@
 import random
 
+
 class GeneticAlgorithm:
     def __init__(self, maze, start_pos, end_pos, population_size=200, mutation_rate=0.04, max_generations=1000):
         """
         Inicializa el algoritmo genético con los parámetros necesarios.
-        
+
         Precondiciones:
             - maze: matriz de enteros, donde 0 representa caminos libres y 1 paredes.
             - start_pos: tupla con la posición inicial del robot (x, y).
@@ -22,13 +23,13 @@ class GeneticAlgorithm:
         self.population_size = population_size
         self.mutation_rate = mutation_rate
         self.max_generations = max_generations
-        self.path_length = 3000  # Longitud máxima de cada ruta
+        self.path_length = 1000  # Longitud máxima de cada ruta
         self.population = self.initialize_population()
 
     def initialize_population(self):
         """
         Inicializa la población de rutas de forma aleatoria.
-        
+
         Poscondiciones:
             - Devuelve una lista de rutas, cada una de las cuales es una lista de movimientos aleatorios.
         """
@@ -37,7 +38,7 @@ class GeneticAlgorithm:
     def random_path(self):
         """
         Genera una ruta aleatoria.
-        
+
         Poscondiciones:
             - Devuelve una lista de movimientos aleatorios (direcciones).
         """
@@ -46,10 +47,10 @@ class GeneticAlgorithm:
     def fitness(self, path):
         """
         Calcula el valor de aptitud (fitness) de una ruta dada.
-        
+
         Precondiciones:
             - path: lista de movimientos (direcciones) que representa una ruta.
-        
+
         Poscondiciones:
             - Devuelve un valor de aptitud basado en la distancia al objetivo.
             - Si la ruta llega al objetivo, devuelve 'inf' como aptitud máxima.
@@ -75,7 +76,7 @@ class GeneticAlgorithm:
     def selection(self):
         """
         Selecciona a los mejores individuos (rutas) de la población.
-        
+
         Poscondiciones:
             - La población se reduce a la mitad, reteniendo a los individuos con mayor aptitud.
         """
@@ -86,10 +87,10 @@ class GeneticAlgorithm:
     def crossover(self, parent1, parent2):
         """
         Realiza el cruce entre dos rutas (individuos).
-        
+
         Precondiciones:
             - parent1 y parent2: listas de movimientos (direcciones).
-        
+
         Poscondiciones:
             - Devuelve una nueva ruta resultante del cruce de los padres.
         """
@@ -99,10 +100,10 @@ class GeneticAlgorithm:
     def mutate(self, path):
         """
         Realiza la mutación en una ruta con una probabilidad dada.
-        
+
         Precondiciones:
             - path: lista de movimientos (direcciones).
-        
+
         Poscondiciones:
             - Devuelve la ruta modificada después de aplicar la mutación.
         """
@@ -114,7 +115,7 @@ class GeneticAlgorithm:
     def evolve(self):
         """
         Ejecuta el proceso de evolución hasta alcanzar la generación máxima o el objetivo.
-        
+
         Poscondiciones:
             - Devuelve la mejor ruta encontrada o una ruta que alcanza el objetivo.
         """
